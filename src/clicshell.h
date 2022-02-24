@@ -49,24 +49,24 @@ typedef struct clicshell{
 } clicshell;
 
 /**
-* [name] clicshell_
+* [name] clicshell_alloc
 * *[description] clicshell constructor
 * ?[input]
 * @par void
 * ![output]
 * @par self (clicshell*) : pointer to clicshell object being constructed (shell object)
 */
-clicshell clicshell_(void);
+clicshell clicshell_alloc(void);
 
 /**
-* [name] _clicshell
+* [name] clicshell_free
 * *[description] clicshell destructor
 * ?[input]
 * @par self (clicshell*) : pointer to clicshell object being destructed
 * ![output]
 * @par success (int) : integer reporting the success or insuccess of the destruction
 */
-int _clicshell(clicshell* self);
+int clicshell_free(clicshell* self);
 
 
 #endif /* _CLICSHELL_H_ */
