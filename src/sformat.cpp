@@ -1,6 +1,9 @@
 #include "sformat.h"
 
-const char * sformat(char* charBuffer, ...)
+
+// todo : Change this function so that it is supported in C89 code
+// (re-write in pure C89 code)
+char * sformat(char* charBuffer, ...)
 {   
     std::string buffer(charBuffer);
     std::string returningString = "";

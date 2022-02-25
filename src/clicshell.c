@@ -8,7 +8,7 @@
                 Shell class implementation file
  ***********************************
 */
-#include "src/clicshell.h"
+#include "clicshell.h"
 
 /**
 * [name] clicshell_alloc
@@ -303,5 +303,5 @@ int clicshell_addCommand( clicshell* self, char* name, char* help, void (*method
 */
 void clicshell_run(clicshell* self)
 {
-    
+
 }

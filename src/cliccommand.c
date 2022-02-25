@@ -8,7 +8,7 @@
                 Command Class implementation file.
  ***********************************
 */
-#include "src/cliccommand.h"
+#include "cliccommand.h"
 /**
 * [name] cliccommand_alloc
 * *[description] cliccommand constructor
@@ -21,7 +21,7 @@
 */
 cliccommand cliccommand_alloc(char* name, char* help, void (*method)(int, char*[], char*))
 {
-    
+
 }
 
 /**
