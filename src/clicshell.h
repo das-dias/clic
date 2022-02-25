@@ -68,5 +68,14 @@ clicshell clicshell_alloc(void);
 */
 int clicshell_free(clicshell* self);
 
+/**
+* [name] clicshell_processCommand
+* *[description] Apply pre processing on the received input string from console
+* ?[input]
+* @par self (clicshell*) : pointer to clicshell object being destructed
+* ![output]
+* @par success (int) : integer reporting the success or insuccess of the destruction
+*/
+int clicshell_preprocessCommand(clicshell* self, char* inputBuffer, char* cmdName, int* argc, char* (*argv[]));
 
 #endif /* _CLICSHELL_H_ */
