@@ -5,48 +5,10 @@
 * *[summary] Console Line Interpreter written in C (CLIC) is a command line interpreter library
                 fully written in C, allowing for the fast and easy integration of the library in other
                 console applications, and with another languages such as Rust-lang.
-                Shell class header file
+                Shell class implementation file
  ***********************************
 */
-#ifndef _CLICSHELL_H_
-#define _CLICSHELL_H_
-
-#include <stdlib.h> /* for using malloc/realloc/free */
-#include <string.h> /* for using memcpy/memmove */
-#include "src/cliccommand.h" /* for interfacing shell commands with the shell itself */
-
-#ifndef RETURN_SUCCESS
-#define RETURN_SUCCESS 0
-#endif
-#ifndef RETURN_FAILURE 
-#define RETURN_FAILURE 1
-#endif
-
-typedef struct CommandStack{
-    int id; // key of the hashed item
-    char* receivedCommand; /* item to be hashed */
-    UT_hash_handle hh;
-} CommandStack;
-
-/**
-* *[name] clicshell
-* *[description] Shell structure of the CLIC interface to interpret, save and validate commands
-* ?[variables]
-* @par commands (cliccommand* (hash)) : hashmap of the commands, hashable by their name
-* @par commandStack (CommandStack* (hash)) : hashmap stack of the received console strings
-* @par historyFileName (char*) : Name of the file in which the history of the programm will be written
-* @par promptMessage (char*) : User prompt message of the shell 
-* @par variableDelimiter (char) : Delimiter of the several possible variable/argument pairs to be parsed through the shell
-* @par argumentDelimiter (char) : Delimiter between the variable and its associated parameter
-*/
-typedef struct clicshell{
-    struct cliccommand* commands; /* hashmap of the commands belonging to the shell, hashable by their name */
-    struct CommandStack* commandStack; /* hashmap stack of the received console strings */
-    char* historyFilepath;
-    char* promptMessage;
-    char* variableDelimiter; /* Delimiter of the several possible variable/argument pairs to be parsed through the shell */
-    char* argumentDelimiter; /* Delimiter between the variable and its associated parameter */
-} clicshell;
+#include "src/clicshell.h"
 
 /**
 * [name] clicshell_alloc
@@ -56,7 +18,10 @@ typedef struct clicshell{
 * ![output]
 * @par self (clicshell*) : pointer to clicshell object being constructed (shell object)
 */
-clicshell clicshell_alloc(void);
+clicshell clicshell_alloc(void)
+{
+
+}
 
 /**
 * [name] clicshell_free
@@ -66,7 +31,10 @@ clicshell clicshell_alloc(void);
 * ![output]
 * @par success (int) : integer reporting the success or insuccess of the destruction
 */
-int clicshell_free(clicshell* self);
+int clicshell_free(clicshell* self)
+{
+
+}
 
 /**
 * [name] clicshell_getHistoryFilepath
@@ -76,7 +44,10 @@ int clicshell_free(clicshell* self);
 * ![output]
 * @par historyFilepath (char*) : return the currently selected history file path
 */
-char* clicshell_getHistoryFilepath(clicshell* self);
+char* clicshell_getHistoryFilepath(clicshell* self)
+{
+
+}
 
 /**
 * [name] clicshell_overwritePromptMessage
@@ -87,7 +58,10 @@ char* clicshell_getHistoryFilepath(clicshell* self);
 * ![output]
 * @par none (void)
 */
-void clicshell_overwriteHistoryFilepath(clicshell* self, char* newHistoryFilepath);
+void clicshell_overwriteHistoryFilepath(clicshell* self, char* newHistoryFilepath)
+{
+
+}
 
 /**
 * [name] clicshell_getPromptMessage
@@ -97,7 +71,10 @@ void clicshell_overwriteHistoryFilepath(clicshell* self, char* newHistoryFilepat
 * ![output]
 * @par promptMessage (char*) : return the currently selected prompting message
 */
-char* clicshell_getPromptMessage(clicshell* self);
+char* clicshell_getPromptMessage(clicshell* self)
+{
+
+}
 
 /**
 * [name] clicshell_overwritePromptMessage
@@ -108,7 +85,10 @@ char* clicshell_getPromptMessage(clicshell* self);
 * ![output]
 * @par none (void)
 */
-void clicshell_overwritePromptMessage(clicshell* self, char* newPromptMEssage);
+void clicshell_overwritePromptMessage(clicshell* self, char* newPromptMEssage)
+{
+
+}
 
 /**
 * [name] clicshell_getVariableDelimiter
@@ -118,7 +98,10 @@ void clicshell_overwritePromptMessage(clicshell* self, char* newPromptMEssage);
 * ![output]
 * @par variableDelimiter (char*) : return the currentçy selected characters delimitting variables
 */
-char* clicshell_getVariableDelimiter(clicshell* self);
+char* clicshell_getVariableDelimiter(clicshell* self)
+{
+
+}
 
 /**
 * [name] clicshell_overwriteVariableDelimiter
@@ -129,7 +112,10 @@ char* clicshell_getVariableDelimiter(clicshell* self);
 * ![output]
 * @par none (void)
 */
-void clicshell_overwriteVariableDelimiter(clicshell* self, char* newVariableDelimiter);
+void clicshell_overwriteVariableDelimiter(clicshell* self, char* newVariableDelimiter)
+{
+
+}
 
 /**
 * [name] clicshell_getArgumentDelimiter
@@ -139,7 +125,10 @@ void clicshell_overwriteVariableDelimiter(clicshell* self, char* newVariableDeli
 * ![output]
 * @par argumentDelimiter (char*) : return the currentçy selected characters that are delimiting arguments from variables
 */
-char* clicshell_getArgumentDelimiter(clicshell* self);
+char* clicshell_getArgumentDelimiter(clicshell* self)
+{
+
+}
 
 /**
 * [name] clicshell_overwriteArgumentDelimiter
@@ -150,7 +139,10 @@ char* clicshell_getArgumentDelimiter(clicshell* self);
 * ![output]
 * @par none (void)
 */
-void clicshell_overwriteArgumentDelimiter(clicshell* self, char* newArgumentDelimiter);
+void clicshell_overwriteArgumentDelimiter(clicshell* self, char* newArgumentDelimiter)
+{
+
+}
 
 /**
 * [name] clicshell_processCommand
@@ -160,7 +152,10 @@ void clicshell_overwriteArgumentDelimiter(clicshell* self, char* newArgumentDeli
 * ![output]
 * @par success (int) : integer reporting the success or insuccess of the destruction
 */
-int clicshell_preprocessCommand(clicshell* self, char* inputBuffer, char* cmdName, int* argc, char* (*argv[]));
+int clicshell_preprocessCommand(clicshell* self, char* inputBuffer, char* cmdName, int* argc, char* (*argv[]))
+{
+
+}
 
 /**
 * [name] clicshell_promptUser
@@ -172,7 +167,10 @@ int clicshell_preprocessCommand(clicshell* self, char* inputBuffer, char* cmdNam
 * ![output]
 * @par (void) : nothing
 */
-void clicshell_promptUser(clicshell* self, char* promptMessage, char* receivedMessage);
+void clicshell_promptUser(clicshell* self, char* promptMessage, char* receivedMessage)
+{
+
+}
 
 /**
 * [name] clicshell_setupNewHistoryEntry
@@ -183,7 +181,10 @@ void clicshell_promptUser(clicshell* self, char* promptMessage, char* receivedMe
 * ![output]
 * @par success (int) : integer indicating the success of the method's operation
 */
-int clicshell_setupNewHistoryEntry(clicshell* self);
+int clicshell_setupNewHistoryEntry(clicshell* self)
+{
+
+}
 
 /**
 * [name] clicshell_updateHistory
@@ -194,7 +195,10 @@ int clicshell_setupNewHistoryEntry(clicshell* self);
 * ![output]
 * @par success (int) : integer indicating the success of the method's operation
 */
-int clicshell_updateHistory(clicshell* self, char* newHistory);
+int clicshell_updateHistory(clicshell* self, char* newHistory)
+{
+
+}
 
 /**
 * [name] clicshell_exit
@@ -207,7 +211,10 @@ int clicshell_updateHistory(clicshell* self, char* newHistory);
 * ![output]
 * @par none (void)
 */
-void clicshell_exit(clicshell* self, int argc, char *argv[]);
+void clicshell_exit(clicshell* self, int argc, char *argv[])
+{
+
+}
 
 /**
 * [name] clicshell_exitHelp
@@ -217,7 +224,10 @@ void clicshell_exit(clicshell* self, int argc, char *argv[]);
 * ![output]
 * @par helpString (char*) : string containing the help information of the exit function
 */
-char* clicshell_exitHelp(clicshell* self);
+char* clicshell_exitHelp(clicshell* self)
+{
+
+}
 
 /**
 * [name] clicshell_automaticCommandFeed
@@ -231,7 +241,10 @@ char* clicshell_exitHelp(clicshell* self);
 * ![output]
 * @par outputHistory (char*) : output history of the functions print-to-console operations
 */
-void clicshell_automaticCommandFeed(clicshell* self, int argc, char *argv[], char* outputHistory);
+void clicshell_automaticCommandFeed(clicshell* self, int argc, char *argv[], char* outputHistory)
+{
+
+}
 
 /**
 * [name] clicshell_acfHelp
@@ -241,7 +254,10 @@ void clicshell_automaticCommandFeed(clicshell* self, int argc, char *argv[], cha
 * ![output]
 * @par helpString (char*) : string containing the help information of the automaticCommandFeedthrough function
 */
-char* clicshell_acfHelp(clicshell* self);
+char* clicshell_acfHelp(clicshell* self)
+{
+
+}
 
 /**
 * [name] clicshell_help
@@ -253,7 +269,10 @@ char* clicshell_acfHelp(clicshell* self);
 * ![output]
 * @par none (void)
 */
-void clicshell_help(clicshell* self);
+void clicshell_help(clicshell* self)
+{
+
+}
 
 /**
 * [name] clicshell_addCommand
@@ -268,7 +287,10 @@ void clicshell_help(clicshell* self);
 * ![output]
 * @par success (int) : integer encoding the success of the function
 */
-int clicshell_addCommand( clicshell* self, char* name, char* help, void (*method)(int, char*[], char*) );
+int clicshell_addCommand( clicshell* self, char* name, char* help, void (*method)(int, char*[], char*) )
+{
+
+}
 
 /**
 * [name] clicshell_run
@@ -279,6 +301,7 @@ int clicshell_addCommand( clicshell* self, char* name, char* help, void (*method
 * ![output]
 * @par none (void)
 */
-void clicshell_run(clicshell* self);
-
-#endif /* _CLICSHELL_H_ */
+void clicshell_run(clicshell* self)
+{
+    
+}

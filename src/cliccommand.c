@@ -5,47 +5,10 @@
 * *[summary] Console Line Interpreter written in C (CLIC) is a command line interpreter library
                 fully written in C, allowing for the fast and easy integration of the library in other
                 console applications, and with another languages such as Rust-lang.
-                Command Class header file.
+                Command Class implementation file.
  ***********************************
 */
-#ifndef _CLICCOMMAND_H_
-#define _CLICCOMMAND_H_
-
-#include <stdlib.h> /* for using malloc/realloc/free */
-#include <string.h> /* for using memcpy/memmove */
-#include "uthash.h" /* for being able to create  */
-
-#ifndef RETURN_SUCCESS
-#define RETURN_SUCCESS 0
-#endif
-#ifndef RETURN_FAILURE
-#define RETURN_FAILURE 1
-#endif
-
-#ifndef MAXCHAR_NAME /* Maximum characters of command's name string */
-#define MAXCHAR_NAME 16
-#endif // !MAXCHAR_NAME
-
-#ifndef MAXCHAR_HELP /* Maximum characters of command's help string */
-#define MAXCHAR_HELP 255
-#endif // !MAXCHAR_HELP
-
-
-/**
-* *[name] CLICCommand
-* *[description] Command unit structure of the CLIC interface
-* ?[variables]
-* @par name ( char* ) : Name of the command used to call it;
-* @par help ( char* ) : Help string stating the description of the command and its variables/arguments
-* @par method ( void (*)(int, char*[], char*) ) : Associated method to the command;
-*/
-typedef struct cliccommand {
-    char* name; // name of the command, and key of the hashable command
-    char* help; // help string of the command
-    void (*method)(int, char*[], char*); // associated method of the command
-    UT_hash_handle hh; /* makes this structure hashable */
-} cliccommand;
-
+#include "src/cliccommand.h"
 /**
 * [name] cliccommand_alloc
 * *[description] cliccommand constructor
@@ -56,7 +19,10 @@ typedef struct cliccommand {
 * ![output]
 * @par self (cliccommand*) : pointer to cliccommand object being constructed
 */
-cliccommand cliccommand_alloc(char* name, char* help, void (*method)(int, char*[], char*));
+cliccommand cliccommand_alloc(char* name, char* help, void (*method)(int, char*[], char*))
+{
+    
+}
 
 /**
 * [name] cliccommand_free
@@ -66,8 +32,10 @@ cliccommand cliccommand_alloc(char* name, char* help, void (*method)(int, char*[
 * ![output]
 * @par success (int) : integer reveiling the success of destruction of the object
 */
-int cliccommand_free(cliccommand* self);
+int cliccommand_free(cliccommand* self)
+{
 
+}
 /**
 * [name] cliccommand_getName
 * *[description] get the name descriptor of a command
@@ -76,7 +44,10 @@ int cliccommand_free(cliccommand* self);
 * ![output]
 * @par name (char*) : name field of the command object
 */
-char * cliccommand_getName(cliccommand* self);
+char * cliccommand_getName(cliccommand* self)
+{
+
+}
 
 /**
 * [name] cliccommand_getHelp
@@ -86,7 +57,10 @@ char * cliccommand_getName(cliccommand* self);
 * ![output]
 * @par help (char*) : help field of the command object
 */
-char * cliccommand_getHelp(cliccommand* self);
+char * cliccommand_getHelp(cliccommand* self)
+{
+
+}
 
 /**
 * [name] cliccommand_execute
@@ -99,6 +73,7 @@ char * cliccommand_getHelp(cliccommand* self);
 * @par outputHistory (char*) :  the output history resultant of 
 * @                             the execution of the command's associated method
 */
-void cliccommand_execute(cliccommand* self, int argc, char* argv[], char * outputHistory);
+void cliccommand_execute(cliccommand* self, int argc, char* argv[], char * outputHistory)
+{
 
-#endif /* CLIC_H_ */
+}
