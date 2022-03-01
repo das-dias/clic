@@ -539,6 +539,8 @@ void clicshell_run(clicshell* self)
                 }
             }
         }
+        /* update terminal output history file */
+        clicshell_updateHistory(self, outputHistory);
 
     } while (1);
 }
