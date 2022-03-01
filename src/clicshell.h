@@ -12,8 +12,13 @@
 #define _CLICSHELL_H_
 
 #include <stdlib.h> /* for using malloc/realloc/free */
+#include <stdio.h>
 #include <string.h> /* for using memcpy/memmove */
-#include "src/cliccommand.h" /* for interfacing shell commands with the shell itself */
+#include <time.h>
+#include "list.h"
+#include "cliccommand.h" /* for interfacing shell commands with the shell itself */
+#include "lib/c-consolelogger/src/consolelogger.h"
+
 
 #ifndef RETURN_SUCCESS
 #define RETURN_SUCCESS 0
@@ -22,11 +27,44 @@
 #define RETURN_FAILURE 1
 #endif
 
+#ifndef MAXCHAR_HISTFILE
+#define MAXCHAR_HISTFILE 26
+#endif
+
+#ifndef MAXCHAR_PROMPT
+#define MAXCHAR_PROMPT 15
+#endif
+
+#ifndef MAXCHAR_ARGDELIM
+#define MAXCHAR_ARGDELIM 3
+#endif
+
+#ifndef MAXCHAR_VARDELIM
+#define MAXCHAR_VARDELIM 3
+#endif
+
+#ifndef MAXCHAR_INPUTBUF
+#define MAXCHAR_INPUTBUF 127
+#endif
+
+#ifndef MAXCHAR_OUTHIST
+#define MAXCHAR_OUTHIST 255
+#endif
+
+#ifndef MAX_ARGS
+#define MAX_ARGS 63
+#endif
+
+#ifndef MAXCHAR_ARGV
+#define MAXCHAR_ARGV 15
+#endif
+
 typedef struct CommandStack{
     int id; // key of the hashed item
-    char* receivedCommand; /* item to be hashed */
+    char receivedCommand[MAXCHAR_INPUTBUF]; /* item to be hashed */
     UT_hash_handle hh;
 } CommandStack;
+
 
 /**
 * *[name] clicshell
@@ -40,6 +78,7 @@ typedef struct CommandStack{
 * @par argumentDelimiter (char) : Delimiter between the variable and its associated parameter
 */
 typedef struct clicshell{
+    console* logger;
     struct cliccommand* commands; /* hashmap of the commands belonging to the shell, hashable by their name */
     struct CommandStack* commandStack; /* hashmap stack of the received console strings */
     char* historyFilepath;
@@ -47,6 +86,11 @@ typedef struct clicshell{
     char* variableDelimiter; /* Delimiter of the several possible variable/argument pairs to be parsed through the shell */
     char* argumentDelimiter; /* Delimiter between the variable and its associated parameter */
 } clicshell;
+
+/*
+* func_type - definition of the type of function to be accepted for each possible variable's argument extraction
+*/
+typedef void (*func_type)(clicshell* self, char*, void*);
 
 /**
 * [name] clicshell_alloc
@@ -56,7 +100,7 @@ typedef struct clicshell{
 * ![output]
 * @par self (clicshell*) : pointer to clicshell object being constructed (shell object)
 */
-clicshell clicshell_alloc(void);
+clicshell* clicshell_alloc(void);
 
 /**
 * [name] clicshell_free
@@ -172,7 +216,7 @@ int clicshell_preprocessCommand(clicshell* self, char* inputBuffer, char* cmdNam
 * ![output]
 * @par (void) : nothing
 */
-void clicshell_promptUser(clicshell* self, char* promptMessage, char* receivedMessage);
+void clicshell_promptUser(clicshell* self, char* inputBuffer);
 
 /**
 * [name] clicshell_setupNewHistoryEntry
@@ -195,6 +239,22 @@ int clicshell_setupNewHistoryEntry(clicshell* self);
 * @par success (int) : integer indicating the success of the method's operation
 */
 int clicshell_updateHistory(clicshell* self, char* newHistory);
+
+/**
+* *[name] clicshell_callBackWrapper
+* *[description] A wrapper to extract the several possible arguments of each variable 
+* ?[input]
+* @par self (clicshell*) : pointer to clicshell object
+* @par argc (int) : number of arguments received and contained within argv
+* @par argv (char*[]) : received array of strings containing the severall 
+* @                     received varibale-argument pairs
+* @par variables (char *) : possible variables to correspond to the etracted arguments
+* @functions (func_type *) : array of function points determining the action for each variable
+* @list (list_t* ) : array of extracted arguments corresponding to each variable
+* ![output]
+* @par none (void)
+*/
+void clicshell_argumentExtractingWrapper(clicshell* self, int argc, char *argv[], char* variables[], func_type* functions, list_t* list);
 
 /**
 * [name] clicshell_exit
@@ -268,7 +328,7 @@ void clicshell_help(clicshell* self);
 * ![output]
 * @par success (int) : integer encoding the success of the function
 */
-int clicshell_addCommand( clicshell* self, char* name, char* help, void (*method)(int, char*[], char*) );
+void clicshell_addCommand( clicshell* self, char* nam, char* help, void (*method)(int, char*[], char*) );
 
 /**
 * [name] clicshell_run

@@ -19,9 +19,15 @@
 * ![output]
 * @par self (cliccommand*) : pointer to cliccommand object being constructed
 */
-cliccommand cliccommand_alloc(char* name, char* help, void (*method)(int, char*[], char*))
+cliccommand* cliccommand_alloc(char* name, char* help, void (*method)(int, char*[], char*))
 {
-
+    cliccommand* self = NULL;
+    self->name = (char*)malloc(sizeof(char)*(strlen(name)+1));
+    strcpy(self->name, name);
+    self->help = (char*)malloc(sizeof(char)*(strlen(help)+1));
+    strcpy(self->help, help);
+    self->method = method;
+    return self;
 }
 
 /**
@@ -34,7 +40,11 @@ cliccommand cliccommand_alloc(char* name, char* help, void (*method)(int, char*[
 */
 int cliccommand_free(cliccommand* self)
 {
-
+    if(self){
+        free(self);
+        return RETURN_SUCCESS;
+    }
+    return RETURN_FAILURE;
 }
 /**
 * [name] cliccommand_getName
@@ -46,7 +56,7 @@ int cliccommand_free(cliccommand* self)
 */
 char * cliccommand_getName(cliccommand* self)
 {
-
+    return self->name;
 }
 
 /**
@@ -59,7 +69,7 @@ char * cliccommand_getName(cliccommand* self)
 */
 char * cliccommand_getHelp(cliccommand* self)
 {
-
+    return self->help;
 }
 
 /**
@@ -75,5 +85,5 @@ char * cliccommand_getHelp(cliccommand* self)
 */
 void cliccommand_execute(cliccommand* self, int argc, char* argv[], char * outputHistory)
 {
-
+    self->method(argc, argv, outputHistory);
 }

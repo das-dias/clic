@@ -1,0 +1,4 @@
+Makefile
+src/libtest.c
+libtest
+libtest.d

@@ -13,7 +13,7 @@
 
 #include <stdlib.h> /* for using malloc/realloc/free */
 #include <string.h> /* for using memcpy/memmove */
-#include "uthash.h" /* for being able to create  */
+#include "lib/uthash/src/uthash.h" /* for being able to create  */
 
 #ifndef RETURN_SUCCESS
 #define RETURN_SUCCESS 0
@@ -56,7 +56,7 @@ typedef struct cliccommand {
 * ![output]
 * @par self (cliccommand*) : pointer to cliccommand object being constructed
 */
-cliccommand cliccommand_alloc(char* name, char* help, void (*method)(int, char*[], char*));
+cliccommand* cliccommand_alloc(char* name, char* help, void (*method)(int, char*[], char*));
 
 /**
 * [name] cliccommand_free
