@@ -15,11 +15,11 @@
 * ?[input]
 * @par name (char*) : name of the command
 * @par help (char*) : help string descriptor of the command and its arguments
-* @par method (void (*)(int, char*[], char*)) : command's associated method to be executed
+* @par method (void (*)(int, char*[])) : command's associated method to be executed
 * ![output]
 * @par self (cliccommand*) : pointer to cliccommand object being constructed
 */
-cliccommand* cliccommand_alloc(char* name, char* help, void (*method)(int, char*[], char*))
+cliccommand* cliccommand_alloc(char* name, char* help, void (*method)(int, char**))
 {
     cliccommand* self = NULL;
     self->name = (char*)malloc(sizeof(char)*(strlen(name)+1));
@@ -80,10 +80,9 @@ char * cliccommand_getHelp(cliccommand* self)
 * @par argc (int)
 * @par argv (char*[])
 * ![output]
-* @par outputHistory (char*) :  the output history resultant of 
-* @                             the execution of the command's associated method
+* @par none (void) : 
 */
-void cliccommand_execute(cliccommand* self, int argc, char* argv[], char * outputHistory)
+void cliccommand_execute(cliccommand* self, int argc, char** argv)
 {
-    self->method(argc, argv, outputHistory);
+    self->method(argc, argv);
 }

@@ -37,12 +37,12 @@
 * ?[variables]
 * @par name ( char* ) : Name of the command used to call it;
 * @par help ( char* ) : Help string stating the description of the command and its variables/arguments
-* @par method ( void (*)(int, char*[], char*) ) : Associated method to the command;
+* @par method ( void (*)(int, char*[]) ) : Associated method to the command;
 */
 typedef struct cliccommand {
     char* name; // name of the command, and key of the hashable command
     char* help; // help string of the command
-    void (*method)(int, char*[], char*); // associated method of the command
+    void (*method)(int, char**); // associated method of the command
     UT_hash_handle hh; /* makes this structure hashable */
 } cliccommand;
 
@@ -52,11 +52,11 @@ typedef struct cliccommand {
 * ?[input]
 * @par name (char*) : name of the command
 * @par help (char*) : help string descriptor of the command and its arguments
-* @par method (void (*)(int, char*[], char*)) : command's associated method to be executed
+* @par method (void (*)(int, char*[])) : command's associated method to be executed
 * ![output]
 * @par self (cliccommand*) : pointer to cliccommand object being constructed
 */
-cliccommand* cliccommand_alloc(char* name, char* help, void (*method)(int, char*[], char*));
+cliccommand* cliccommand_alloc(char* name, char* help, void (*method)(int, char**));
 
 /**
 * [name] cliccommand_free
@@ -96,9 +96,8 @@ char * cliccommand_getHelp(cliccommand* self);
 * @par argc (int)
 * @par argv (char*[])
 * ![output]
-* @par outputHistory (char*) :  the output history resultant of 
-* @                             the execution of the command's associated method
+* @par none (void) : 
 */
-void cliccommand_execute(cliccommand* self, int argc, char* argv[], char * outputHistory);
+void cliccommand_execute(cliccommand* self, int argc, char** argv);
 
 #endif /* CLIC_H_ */

@@ -25,8 +25,6 @@ clicshell* clicshell_alloc(void)
     self->logger = console_alloc();
     self->commands = NULL;
     self->commandStack = NULL;
-    self->historyFilepath = (char*) malloc(sizeof(char) * MAXCHAR_HISTFILE);
-    strcpy( self->historyFilepath, "./history-log.txt" );
     self->promptMessage = (char*) malloc(sizeof(char) * MAXCHAR_PROMPT);
     strcpy( self->promptMessage, "clic$>" );
     self->variableDelimiter = (char*) malloc(sizeof(char) * MAXCHAR_VARDELIM);
@@ -55,34 +53,6 @@ int clicshell_free(clicshell* self)
         return EXIT_SUCCESS;
     }
     return EXIT_FAILURE;
-}
-
-/**
-* [name] clicshell_getHistoryFilepath
-* *[description] See the currently settked history file path
-* ?[input]
-* @par self (clicshell*) : pointer to clicshell object
-* ![output]
-* @par historyFilepath (char*) : return the currently selected history file path
-*/
-char* clicshell_getHistoryFilepath(clicshell* self)
-{
-    return self->historyFilepath;
-}
-
-/**
-* [name] clicshell_overwritePromptMessage
-* *[description] Settle a new history filepath for the shell
-* ?[input]
-* @par self (clicshell*) : pointer to clicshell object
-* @par newHistoryFilepath (char*) : the new history filepath
-* ![output]
-* @par none (void)
-*/
-void clicshell_overwriteHistoryFilepath(clicshell* self, char* newHistoryFilepath)
-{
-    self->historyFilepath = (char*) realloc( self->historyFilepath, sizeof(char) * (strlen( newHistoryFilepath ) + 1) );
-    strcpy(self->historyFilepath, newHistoryFilepath);
 }
 
 /**
@@ -174,10 +144,14 @@ void clicshell_overwriteArgumentDelimiter(clicshell* self, char* newArgumentDeli
 * *[description] Apply pre processing on the received input string from console
 * ?[input]
 * @par self (clicshell*) : pointer to clicshell object
+* @par inputBuffer (char*) : input buffer register
+* @par cmdName (char*) : command's name
+* @par argc (int *) : pointer to the commands name
+* @par argv (char**) :  array of c-strings
 * ![output]
 * @par success (int) : integer reporting the success or insuccess of the destruction
 */
-int clicshell_preprocessCommand(clicshell* self, char* inputBuffer, char* cmdName, int* argc, char* (*argv[]))
+int clicshell_preprocessCommand(clicshell* self, char* inputBuffer, char* cmdName, int* argc, char** argv)
 {
     //split the received input buffer in multiple tokens
     char* token = strtok(inputBuffer, (const char*)self->variableDelimiter);
@@ -186,13 +160,16 @@ int clicshell_preprocessCommand(clicshell* self, char* inputBuffer, char* cmdNam
     {
         if( strcpy(cmdName, token) );
         else return EXIT_FAILURE;
-        token = strtok(NULL, (const char*) self->variableDelimiter );
+        token = strtok(NULL, (const char*) self->variableDelimiter ); // token is temporary memmory
         // the remaining variable-argument pairs are to be stored in argv
         *argc = 0;
         while( token != NULL )
         {
-            if ( strcpy((*argv)[*argc],token) );   
-            else return EXIT_FAILURE;
+            argv[*argc] = (char*) malloc(sizeof(char)*strlen(token)+1);
+            strcpy(argv[*argc], token);
+            if ( strlen((argv)[*argc] ) );   
+            else
+                return EXIT_FAILURE;
             token = strtok(NULL, (const char*) self->variableDelimiter );
             (*argc)++;
         }
@@ -214,117 +191,25 @@ int clicshell_preprocessCommand(clicshell* self, char* inputBuffer, char* cmdNam
 void clicshell_promptUser(clicshell* self, char* inputBuffer)
 {
     console_msg( self->logger, sformat("%s",self->promptMessage) );
-    char receivedChar;
     fgets(inputBuffer, MAXCHAR_INPUTBUF, stdin);
 }
 
 /**
 * [name] clicshell_setupNewHistoryEntry
-* *[description]    Shell command for setting up the header of
-* *                   new history file entries
+* *[description]    Shell command for printting a new date time
+* *                 to the console terminal
 * ?[input]
 * @par self (clicshell*) : pointer to clicshell object
 * ![output]
-* @par success (int) : integer indicating the success of the method's operation
+* @par none (void) :
 */
-int clicshell_setupNewHistoryEntry(clicshell* self)
+void clicshell_setupNewHistoryEntry(clicshell* self)
 {
-    FILE* histFile;
-    /* open to append to history file */
-    if( ( histFile = fopen(self->historyFilepath, "w+") )== NULL)
-    {
-        console_error(self->logger, sformat("Could not open file %s.\n", self->historyFilepath) );
-        return EXIT_FAILURE;
-    }
     /* obtain the current date and time */
     time_t now = time(0);
     char* nowDateTime = ctime(&now);
     /* write to file */
-    fprintf( histFile, "new log> %s\n\r", nowDateTime);
-    fclose(histFile);
-    return EXIT_SUCCESS;
-}
-
-/**
-* [name] clicshell_updateHistory
-* *[description]    Shell command for writting a new history file entry
-* ?[input]
-* @par self (clicshell*) : pointer to clicshell object
-* @par newHistory (char*) : new history entry to add to the history tex file
-* ![output]
-* @par success (int) : integer indicating the success of the method's operation
-*/
-int clicshell_updateHistory(clicshell* self, char* newHistory)
-{
-    FILE* histFile;
-    /* open to append to history file */
-    if( ( histFile = fopen(self->historyFilepath, "w+") ) == NULL)
-    {
-        console_error(self->logger, sformat("Could not open file %s.\n", self->historyFilepath) );
-        return EXIT_FAILURE;
-    }
-    /* if opening was successful, append new history to file */
-    fprintf( histFile, "%s\n\r", newHistory );
-    fclose(histFile);
-    return EXIT_SUCCESS;
-}
-
-/**
-* *[name] clicshell_callBackWrapper
-* *[description] A wrapper to extract the several possible arguments of each variable 
-* ?[input]
-* @par self (clicshell*) : pointer to clicshell object
-* @par argc (int) : number of arguments received and contained within argv
-* @par argv (char*[]) : received array of strings containing the severall 
-* @                     received varibale-argument pairs
-* @par variables (char *) : possible variables to correspond to the etracted arguments
-* @functions (func_type *) : array of function points determining the action for each variable
-* ![output]
-* @par none (void)
-*/
-void clicshell_argumentExtractingWrapper(clicshell* self, int argc, char *argv[], char* variables[], func_type* functions, list_t* list)
-{
-    char* receivedVariable;
-    char* receivedArgument;
-    /* 
-    * the size of the variables array has to be greater 
-    * or equal to the number of received arguments
-    */
-    int size = sizeof(variables) / sizeof(*variables);
-    /* for each of the arguments received */
-    if(argc>size){
-        console_error(self->logger, sformat("Too many arguments. Expected %d ; Received %d.\n",size, argc));
-        return;
-    }
-    for(int i = 0; i < argc; argc++)
-    {
-        if(receivedVariable = strtok(argv[i], (const char*) self->argumentDelimiter ) != NULL)
-        {    
-            if(receivedArgument = strtok(NULL, (const char*) self->argumentDelimiter ) != NULL)
-            {
-                /* issue variable string comparing phase */
-                for(int j = 0; j< size; j++)
-                {
-                    if(!strcmp(variables[j], receivedVariable))
-                    {
-                        (functions[j])(self, receivedArgument, list[j].data);
-                    }
-                }
-                console_error( self->logger, sformat("Unrecognized variable [%s].\n", receivedVariable) );
-                return;
-            } 
-            else 
-            {
-                console_error( self->logger, sformat("Non-existing argument to parsed variable [%s].\n", receivedVariable) ); /* log error message */
-                return;
-            }
-        } 
-        else
-        {
-            console_error( self->logger, "No variable received.\n"); /* log error message */
-            return;
-        }
-    }
+    console_msg(self->logger,sformat("new log> %s\n\r", nowDateTime));
 }
 
 /**
@@ -338,34 +223,69 @@ void clicshell_argumentExtractingWrapper(clicshell* self, int argc, char *argv[]
 * ![output]
 * @par none (void)
 */
-void clicshell_exit(clicshell* self, int argc, char *argv[])
+void clicshell_exit(clicshell* self, int argc, char** argv)
 {
     int exitIndex = 0;
-    char* variables[] = {
+    char* variables[1] = {
         "ei" /* exit index */
     };
-    /* each var will be associated with one function */
-    list_t vars[] = { 
-        list_init(exitIndex) 
-    };
-    void clicshell_exit_func1(clicshell* self, char* receivedArgument, int* exitIndex);
-    func_type functions[] ={
-        &clicshell_exit_func1
-    };
-    clicshell_argumentExtractingWrapper(self, argc, argv, variables, functions, vars);
-    console_msg( self->logger, sformat("Exiting - %d", exitIndex) );
-    exit(exitIndex);
-}
-
-inline void clicshell_exit_func1(clicshell* self, char* receivedArgument, int* exitIndex)
-{
-    for(; *receivedArgument; (*receivedArgument)++)
-        if(!isalnum(*receivedArgument))
+    char* receivedVariable;
+    char* receivedArgument;
+    u_int8_t varAttributed = 0;
+    /* 
+    * the size of the variables array has to be greater 
+    * or equal to the number of received arguments
+    */
+    int size = sizeof(variables) / sizeof(*variables);
+    /* for each of the arguments received */
+    if(argc>size){
+        console_error(self->logger, sformat("Too many arguments. Expected %d ; Received %d.\n",size, argc));
+        return;
+    }
+    for(int i = 0; i < argc; argc++)
+    {
+        varAttributed = 0; /* no var was attributed yet*/
+        if( (receivedVariable = strtok(argv[i], (const char*) self->argumentDelimiter ) ) != NULL)
+        {    
+            if( (receivedArgument = strtok(NULL, (const char*) self->argumentDelimiter ) ) != NULL)
+            {
+                /* issue variable string comparing phase */
+                for(int j = 0; j< size; j++)
+                {
+                    if(!strcmp(variables[j], receivedVariable))
+                    {
+                        for(; *receivedArgument; (*receivedArgument)++)
+                            if(!isalnum(*receivedArgument))
+                            {
+                                console_error( self->logger, sformat("Received exiting index [%s] is not an integer.\n", receivedArgument) );
+                                return;
+                            }
+                        exitIndex = atoi(receivedArgument);
+                        /* signal var attribution */
+                        varAttributed = 1;
+                        break; /* break nested for loop */
+                    }
+                }
+                if(!varAttributed)
+                {
+                    console_error( self->logger, sformat("Unrecognized variable [%s].\n", receivedVariable) );
+                    return;
+                }        
+            } 
+            else 
+            {
+                console_error( self->logger, sformat("Non-existing argument to parsed variable [%s].\n", receivedVariable) ); /* log error message */
+                return;
+            }
+        } 
+        else
         {
-            console_error( self->logger, sformat("Received exiting index [%s] is not an integer.\n", receivedArgument) );
+            console_error( self->logger, "No variable received.\n"); /* log error message */
             return;
         }
-    *exitIndex = atoi(receivedArgument);
+    }
+    console_msg( self->logger, sformat("Exiting - %d", &exitIndex) );
+    exit(exitIndex);
 }
 
 /**
@@ -376,9 +296,10 @@ inline void clicshell_exit_func1(clicshell* self, char* receivedArgument, int* e
 * ![output]
 * @par helpString (char*) : string containing the help information of the exit function
 */
-char* clicshell_exitHelp(clicshell* self)
+void clicshell_exitHelp(clicshell* self)
 {
-    return "exit - [description] : exit application - [commands] : ei--[(int) 0-3] application exit state parameter";
+    char* exitHelp = "exit - [description] : exit application - [commands] : ei--[(int) 0-3] application exit state parameter";
+    console_msg(self->logger, exitHelp);
 }
 
 /**
@@ -391,28 +312,76 @@ char* clicshell_exitHelp(clicshell* self)
 * @par argv (char*[]) : received array of strings containing the severall 
 * @                     received varibale-argument pairs
 * ![output]
-* @par outputHistory (char*) : output history of the functions print-to-console operations
+* @par void (none) :
 */
-void clicshell_automaticCommandFeed(clicshell* self, int argc, char *argv[], char* outputHistory)
+void clicshell_automaticCommandFeed(clicshell* self, int argc, char** argv)
 {
     char filePath[MAXCHAR_INPUTBUF/2] = "";
     char inputBuf[MAXCHAR_INPUTBUF];
-    char* variables[] = {
+    char* variables[1] = {
         "f" /* exit index */
     };
-    list_t list[]={
-        array_list_init(filePath)
-    };
-    void clicshell_acf_func1(clicshell* shell, char* receivedArgument, char* filePath);
-    func_type functions[] = {
-        &clicshell_acf_func1
-    };
-    clicshell_argumentExtractingWrapper(self, argc, argv, variables, functions, list);
+    char* receivedVariable;
+    char* receivedArgument;
+    u_int8_t varAttributed = 0;
+    /* 
+    * the size of the variables array has to be greater 
+    * or equal to the number of received arguments
+    */
+    int size = sizeof(variables) / sizeof(*variables);
+    /* for each of the arguments received */
+    if(argc>size){
+        console_error(self->logger, sformat("Too many arguments. Expected %d ; Received %d.\n",size, argc));
+        return;
+    }
+    for(int i = 0; i < argc; argc++)
+    {
+        /* signal that no variables was yet attributed */
+        varAttributed = 0;
+        if( (receivedVariable = strtok(argv[i], (const char*) self->argumentDelimiter ) ) != NULL)
+        {    
+            if( (receivedArgument = strtok(NULL, (const char*) self->argumentDelimiter ) ) != NULL)
+            {
+                /* issue variable string comparing phase */
+                for(int j = 0; j< size; j++)
+                {
+                    if(!strcmp(variables[j], receivedVariable))
+                    {
+                        /* copy the received argument into file path */
+                        strcpy(filePath, receivedArgument);
+                        if(!strlen(filePath))
+                        {
+                            console_error(self->logger, "No argument was received.\n");
+                            return;
+                        }
+                        /* signal variable attribution */
+                        varAttributed = 1;
+                        break;/* break nested for loop */
+                    }
+                }
+                if(!varAttributed)
+                {
+                    console_error( self->logger, sformat("Unrecognized variable [%s].\n", receivedVariable) );
+                    return;
+                } 
+            } 
+            else 
+            {
+                console_error( self->logger, sformat("Non-existing argument to parsed variable [%s].\n", receivedVariable) ); /* log error message */
+                return;
+            }
+        } 
+        else
+        {
+            console_error( self->logger, "No variable received.\n"); /* log error message */
+            return;
+        }
+    }
     /* if the file path is not the predefined value, open the file and extract the command strings from there*/
-    if(filePath != NULL)
+    if(strlen(filePath))
     {
        FILE* commandFeedFile;
-       if( commandFeedFile = fopen(filePath, "r") == NULL)
+       if( ( commandFeedFile = fopen(filePath, "r") ) == NULL)
        {
            console_error( self->logger, sformat("Error opening file - %s\n", filePath) ) ; /* log error to console */
            return; /* perform no further operations */
@@ -421,17 +390,11 @@ void clicshell_automaticCommandFeed(clicshell* self, int argc, char *argv[], cha
        while( fscanf(commandFeedFile, "%s", inputBuf) )
        {
             //store the read line on the command stack
-            CommandStack* cs;
+            CommandStack* cs = NULL;
             strcpy(cs->receivedCommand, inputBuf);
             HASH_ADD_INT(self->commandStack, id, cs);
        }
     }
-}
-
-void clicshell_acf_func1(clicshell* shell, char* receivedArgument, char* filePath)
-{
-    /* copy the received argument into file path */
-    filePath = strcpy(filePath, receivedArgument);
 }
 /**
 * [name] clicshell_acfHelp
@@ -441,9 +404,10 @@ void clicshell_acf_func1(clicshell* shell, char* receivedArgument, char* filePat
 * ![output]
 * @par helpString (char*) : string containing the help information of the automaticCommandFeedthrough function
 */
-char* clicshell_acfHelp(clicshell* self)
+void clicshell_acfHelp(clicshell* self)
 {
-    return "acf - [description] : automatic command feedthrough - [arguments] : f--[(string) *filepath* ] text file path of commands.\n";
+    char* acfHelp = "acf - [description] : automatic command feedthrough - [arguments] : f--[(string) *filepath* ] text file path of commands.\n";
+    console_msg(self->logger, acfHelp);
 }
 
 /**
@@ -463,8 +427,8 @@ void clicshell_help(clicshell* self)
     {
         console_msg( self->logger, sformat("%s\n",*self->commands->help) );
     }
-    console_msg( self->logger, sformat("%s\n", clicshell_acfHelp(self) ) );
-    console_msg( self->logger, sformat("%s\n", clicshell_exitHelp(self) ) );
+    clicshell_acfHelp(self);
+    clicshell_exitHelp(self);
 }
 
 /**
@@ -480,12 +444,9 @@ void clicshell_help(clicshell* self)
 * ![output]
 * @par success (int) : integer encoding the success of the function
 */
-void clicshell_addCommand( clicshell* self, char* nam, char* help, void (*method)(int, char*[], char*) )
+void clicshell_addCommand( clicshell* self, char* nam, char* help, void (*method)(int, char**) )
 {
-    cliccommand* cmd;
-    strcpy(cmd->name, nam);
-    strcpy(cmd->help, help);
-    cmd->method = method;
+    cliccommand* cmd = cliccommand_alloc(nam, help, method);
     HASH_ADD_STR(self->commands, name, cmd);
 }
 
@@ -500,15 +461,19 @@ void clicshell_addCommand( clicshell* self, char* nam, char* help, void (*method
 */
 void clicshell_run(clicshell* self)
 {
-    /* initialize a new history entry on the history file */
+    console_msg(self->logger, "CLIC version 1.1\n");
+    console_msg(self->logger, "\n[!] Save terminal output to a file: ");
+    console_msg(self->logger, "./[main_file_name] > [history_text_file_name].txt\n");
+    console_msg(self->logger, "\n[!] View saved terminal output history file: ");
+    console_msg(self->logger, "cat [history_text_file_name].txt\n");
+    /* initialize a new history entry to the terminal */
     clicshell_setupNewHistoryEntry(self);
     do
     {
         char inputBuf[MAXCHAR_INPUTBUF];
-        char outputHistory[MAXCHAR_OUTHIST];
         char cmdName[MAXCHAR_NAME];
         int argc = 0;
-        char argv[MAX_ARGS][MAXCHAR_ARGV];
+        char* argv[MAX_ARGS] = {"\0"};
         if(self->commandStack) /* if there are commands to read from stack */
         {
             strcpy(inputBuf, self->commandStack->receivedCommand);
@@ -519,28 +484,35 @@ void clicshell_run(clicshell* self)
             clicshell_promptUser(self, inputBuf);
         }
         /* after absorbing user input, preprocess the received string */
-        if (clicshell_preprocessCommand(self, inputBuf, cmdName, &argc, &argv) == EXIT_SUCCESS)
+        if (clicshell_preprocessCommand(self, inputBuf, cmdName, &argc, argv) == EXIT_SUCCESS)
         {
             if(!strcmp(cmdName, "help")) /* is help command? */
                 clicshell_help(self);
             else if (!strcmp(cmdName, "exit"))  /* is exit command? */
                 clicshell_exit(self,argc, argv);
             else if (!strcmp(cmdName, "acf"))  /* is acf command? */
-                clicshell_automaticCommandFeed(self, argc, argv, outputHistory);
+                clicshell_automaticCommandFeed(self, argc, argv);
             else{
-                cliccommand* cmd;
+                cliccommand* cmd = NULL;
                 HASH_FIND_STR(self->commands, cmdName, cmd);
                 if(cmd){ /* if command exists in the shell's database */
                     /* execute the command with the respective parameters */
-                    cmd->method(argc, argv, outputHistory);
+                    cmd->method(argc, argv);
                 } else {
                     /* command doesn't exist */
                     console_error( self->logger, sformat("Non existant command - %s\n", cmdName) ); /* issue error log to console*/
                 }
             }
         }
-        /* update terminal output history file */
-        clicshell_updateHistory(self, outputHistory);
-
+        else {
+            console_error(self->logger, "Bad command preprocessing.\n");
+        }
+        
+        // clear allocated memory at the end of each creation cycle
+        for(int i=0; i<MAX_ARGS; i++)
+            if(strlen(argv[i]))
+                free(argv[i]);
+        free(argv);
+        
     } while (1);
 }

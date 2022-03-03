@@ -12,12 +12,13 @@
 #define _CLICSHELL_H_
 
 #include <stdlib.h> /* for using malloc/realloc/free */
+#include <ctype.h>
 #include <stdio.h>
 #include <string.h> /* for using memcpy/memmove */
 #include <time.h>
-#include "list.h"
 #include "cliccommand.h" /* for interfacing shell commands with the shell itself */
 #include "lib/c-consolelogger/src/consolelogger.h"
+
 
 
 #ifndef RETURN_SUCCESS
@@ -81,7 +82,6 @@ typedef struct clicshell{
     console* logger;
     struct cliccommand* commands; /* hashmap of the commands belonging to the shell, hashable by their name */
     struct CommandStack* commandStack; /* hashmap stack of the received console strings */
-    char* historyFilepath;
     char* promptMessage;
     char* variableDelimiter; /* Delimiter of the several possible variable/argument pairs to be parsed through the shell */
     char* argumentDelimiter; /* Delimiter between the variable and its associated parameter */
@@ -112,26 +112,6 @@ clicshell* clicshell_alloc(void);
 */
 int clicshell_free(clicshell* self);
 
-/**
-* [name] clicshell_getHistoryFilepath
-* *[description] See the currently settked history file path
-* ?[input]
-* @par self (clicshell*) : pointer to clicshell object
-* ![output]
-* @par historyFilepath (char*) : return the currently selected history file path
-*/
-char* clicshell_getHistoryFilepath(clicshell* self);
-
-/**
-* [name] clicshell_overwritePromptMessage
-* *[description] Settle a new history filepath for the shell
-* ?[input]
-* @par self (clicshell*) : pointer to clicshell object
-* @par newHistoryFilepath (char*) : the new history filepath
-* ![output]
-* @par none (void)
-*/
-void clicshell_overwriteHistoryFilepath(clicshell* self, char* newHistoryFilepath);
 
 /**
 * [name] clicshell_getPromptMessage
@@ -201,10 +181,14 @@ void clicshell_overwriteArgumentDelimiter(clicshell* self, char* newArgumentDeli
 * *[description] Apply pre processing on the received input string from console
 * ?[input]
 * @par self (clicshell*) : pointer to clicshell object
+* @par inputBuffer (char*) : input buffer register
+* @par cmdName (char*) : command's name
+* @par argc (int *) : pointer to the commands name
+* @par argv (char**) :  array of c-strings
 * ![output]
 * @par success (int) : integer reporting the success or insuccess of the destruction
 */
-int clicshell_preprocessCommand(clicshell* self, char* inputBuffer, char* cmdName, int* argc, char* (*argv[]));
+int clicshell_preprocessCommand(clicshell* self, char* inputBuffer, char* cmdName, int *argc, char** argv);
 
 /**
 * [name] clicshell_promptUser
@@ -220,41 +204,14 @@ void clicshell_promptUser(clicshell* self, char* inputBuffer);
 
 /**
 * [name] clicshell_setupNewHistoryEntry
-* *[description]    Shell command for setting up the header of
-* *                   new history file entries
+* *[description]    Shell command for printting a new date time
+* *                 to the console terminal
 * ?[input]
 * @par self (clicshell*) : pointer to clicshell object
 * ![output]
-* @par success (int) : integer indicating the success of the method's operation
+* @par none (void) :
 */
-int clicshell_setupNewHistoryEntry(clicshell* self);
-
-/**
-* [name] clicshell_updateHistory
-* *[description]    Shell command for writting a new history file entry
-* ?[input]
-* @par self (clicshell*) : pointer to clicshell object
-* @par newHistory (char*) : new history entry to add to the history tex file
-* ![output]
-* @par success (int) : integer indicating the success of the method's operation
-*/
-int clicshell_updateHistory(clicshell* self, char* newHistory);
-
-/**
-* *[name] clicshell_callBackWrapper
-* *[description] A wrapper to extract the several possible arguments of each variable 
-* ?[input]
-* @par self (clicshell*) : pointer to clicshell object
-* @par argc (int) : number of arguments received and contained within argv
-* @par argv (char*[]) : received array of strings containing the severall 
-* @                     received varibale-argument pairs
-* @par variables (char *) : possible variables to correspond to the etracted arguments
-* @functions (func_type *) : array of function points determining the action for each variable
-* @list (list_t* ) : array of extracted arguments corresponding to each variable
-* ![output]
-* @par none (void)
-*/
-void clicshell_argumentExtractingWrapper(clicshell* self, int argc, char *argv[], char* variables[], func_type* functions, list_t* list);
+void clicshell_setupNewHistoryEntry(clicshell* self);
 
 /**
 * [name] clicshell_exit
@@ -267,7 +224,7 @@ void clicshell_argumentExtractingWrapper(clicshell* self, int argc, char *argv[]
 * ![output]
 * @par none (void)
 */
-void clicshell_exit(clicshell* self, int argc, char *argv[]);
+void clicshell_exit(clicshell* self, int argc, char** argv);
 
 /**
 * [name] clicshell_exitHelp
@@ -277,7 +234,7 @@ void clicshell_exit(clicshell* self, int argc, char *argv[]);
 * ![output]
 * @par helpString (char*) : string containing the help information of the exit function
 */
-char* clicshell_exitHelp(clicshell* self);
+void clicshell_exitHelp(clicshell* self);
 
 /**
 * [name] clicshell_automaticCommandFeed
@@ -291,7 +248,7 @@ char* clicshell_exitHelp(clicshell* self);
 * ![output]
 * @par outputHistory (char*) : output history of the functions print-to-console operations
 */
-void clicshell_automaticCommandFeed(clicshell* self, int argc, char *argv[], char* outputHistory);
+void clicshell_automaticCommandFeed(clicshell* self, int argc, char** argv);
 
 /**
 * [name] clicshell_acfHelp
@@ -301,7 +258,7 @@ void clicshell_automaticCommandFeed(clicshell* self, int argc, char *argv[], cha
 * ![output]
 * @par helpString (char*) : string containing the help information of the automaticCommandFeedthrough function
 */
-char* clicshell_acfHelp(clicshell* self);
+void clicshell_acfHelp(clicshell* self);
 
 /**
 * [name] clicshell_help
@@ -328,7 +285,7 @@ void clicshell_help(clicshell* self);
 * ![output]
 * @par success (int) : integer encoding the success of the function
 */
-void clicshell_addCommand( clicshell* self, char* nam, char* help, void (*method)(int, char*[], char*) );
+void clicshell_addCommand( clicshell* self, char* nam, char* help, void (*method)(int, char**) );
 
 /**
 * [name] clicshell_run
