@@ -30,8 +30,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 * *****************************************************************************
 */
-#ifndef _CLICCOMMAND_H_
-#define _CLICCOMMAND_H_
+#ifndef __CLICCOMMAND_H__
+#define __CLICCOMMAND_H__
 
 #include <stdlib.h> /* for using malloc/realloc/free */
 #include <string.h> /* for using memcpy/memmove */
@@ -122,4 +122,4 @@ char * cliccommand_getHelp(cliccommand* self);
 */
 void cliccommand_execute(cliccommand* self, int argc, char** argv);
 
-#endif /* CLIC_H_ */
+#endif // !__CLICCOMMAND_H__

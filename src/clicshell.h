@@ -30,8 +30,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 * *****************************************************************************
 */
-#ifndef _CLICSHELL_H_
-#define _CLICSHELL_H_
+#ifndef __CLICSHELL_H__
+#define __CLICSHELL_H__
 
 #include <stdlib.h> /* for using malloc/realloc/free */
 #include <ctype.h>
@@ -40,8 +40,6 @@ SOFTWARE.
 #include <time.h>
 #include "cliccommand.h" /* for interfacing shell commands with the shell itself */
 #include "lib/c-consolelogger/src/consolelogger.h"
-
-
 
 #ifndef RETURN_SUCCESS
 #define RETURN_SUCCESS 0

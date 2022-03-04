@@ -27,12 +27,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 * *****************************************************************************
 */
-#ifndef _CLIC_H_
-#define _CLIC_H_
+#ifndef __CLIC_H__
+#define __CLIC_H__
 
 #pragma once
 
 #include "cliccommand.h"
 #include "clicshell.h"
 
-#endif // !_CLIC_H_
+#endif // !__CLIC_H__
