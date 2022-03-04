@@ -21,7 +21,7 @@
 */
 cliccommand* cliccommand_alloc(char* name, char* help, void (*method)(int, char**))
 {
-    cliccommand* self = NULL;
+    cliccommand* self = (cliccommand*) malloc(sizeof *self);
     self->name = (char*)malloc(sizeof(char)*(strlen(name)+1));
     strcpy(self->name, name);
     self->help = (char*)malloc(sizeof(char)*(strlen(help)+1));

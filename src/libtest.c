@@ -43,27 +43,27 @@ int main(void)
                                 commandMethods[i]
                             );
     clicshell_run(shell);
-    
+    clicshell_free(shell);
     return 0;
 }
 
 void interfaceFunc1(int argc, char * argv[]){
     for (int i = 0; i < argc; i++) {
-        printf( "%s\n", argv[i]);
+        printf( "Func 1 received var-arg pair :%s\n", argv[i]);
     }
-    printf("Func 1 says : everything is cool for now! :-)");
+    printf("Func 1 says : everything is cool for now! :-)\n");
 }
 
 void interfaceFunc2(int argc, char * argv[]){
     for (int i = 0; i < argc; i++) {
-        printf( "%s\n", argv[i]);
+        printf( "Func 2 received var-arg pair : %s\n", argv[i]);
     }
-    printf("Func 2 says : everything is cool for now! :-)");
+    printf("Func 2 says : everything is cool for now! :-)\n");
 }
 
 void interfaceFunc3(int argc, char * argv[]){
     for (int i = 0; i < argc; i++) {
-        printf( "%s\n", argv[i]);
+        printf( "Func 3 received var-arg pair :%s\n", argv[i]);
     }
-    printf("Func 3 says : everything is cool for now! :-)");
+    printf("Func 3 says : everything is cool for now! :-)\n");
 }

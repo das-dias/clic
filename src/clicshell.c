@@ -20,8 +20,7 @@
 */
 clicshell* clicshell_alloc(void)
 {
-    clicshell* self = NULL;
-
+    clicshell* self = (clicshell* ) malloc(sizeof *self);
     self->logger = console_alloc();
     self->commands = NULL;
     self->commandStack = NULL;
@@ -44,11 +43,8 @@ clicshell* clicshell_alloc(void)
 */
 int clicshell_free(clicshell* self)
 {
-    if(self)
+    if(self != NULL) 
     {   
-        console_free(self->logger);
-        if(self->commands) free(self->commands);
-        if(self->commandStack) free(self->commandStack);
         free(self);
         return EXIT_SUCCESS;
     }
@@ -156,16 +152,16 @@ int clicshell_preprocessCommand(clicshell* self, char* inputBuffer, char* cmdNam
     //split the received input buffer in multiple tokens
     char* token = strtok(inputBuffer, (const char*)self->variableDelimiter);
     //the first token is the name of the commnd to be executed
-    if(token)
+    if(token != NULL)
     {
         if( strcpy(cmdName, token) );
         else return EXIT_FAILURE;
-        token = strtok(NULL, (const char*) self->variableDelimiter ); // token is temporary memmory
         // the remaining variable-argument pairs are to be stored in argv
+        token = strtok(NULL, (const char*) self->variableDelimiter );
         *argc = 0;
         while( token != NULL )
         {
-            argv[*argc] = (char*) malloc(sizeof(char)*strlen(token)+1);
+            argv[*argc] = (char*) malloc(sizeof(char)*(strlen(token)+1));
             strcpy(argv[*argc], token);
             if ( strlen((argv)[*argc] ) );   
             else
@@ -190,8 +186,20 @@ int clicshell_preprocessCommand(clicshell* self, char* inputBuffer, char* cmdNam
 */
 void clicshell_promptUser(clicshell* self, char* inputBuffer)
 {
+    char inChar;
+    int charsReceived = 0;
     console_msg( self->logger, sformat("%s",self->promptMessage) );
-    fgets(inputBuffer, MAXCHAR_INPUTBUF, stdin);
+    inChar = getchar();
+    while(  ( (inChar != '\n') && (inChar != '\r') ) && (inChar != EOF) )
+    {
+        *(inputBuffer++) = inChar;
+        charsReceived ++;
+        inChar = getchar();
+    }
+    *inputBuffer = 0;
+    if( !charsReceived ){
+        console_error(self->logger, "Empty command.\n");
+    }
 }
 
 /**
@@ -242,7 +250,7 @@ void clicshell_exit(clicshell* self, int argc, char** argv)
         console_error(self->logger, sformat("Too many arguments. Expected %d ; Received %d.\n",size, argc));
         return;
     }
-    for(int i = 0; i < argc; argc++)
+    for(int i = 0; i < argc; i++)
     {
         varAttributed = 0; /* no var was attributed yet*/
         if( (receivedVariable = strtok(argv[i], (const char*) self->argumentDelimiter ) ) != NULL)
@@ -254,12 +262,13 @@ void clicshell_exit(clicshell* self, int argc, char** argv)
                 {
                     if(!strcmp(variables[j], receivedVariable))
                     {
-                        for(; *receivedArgument; (*receivedArgument)++)
-                            if(!isalnum(*receivedArgument))
+                        for(unsigned long k = 0; k< strlen(receivedArgument); k++){
+                            if(!isalnum(receivedArgument[k]))
                             {
                                 console_error( self->logger, sformat("Received exiting index [%s] is not an integer.\n", receivedArgument) );
                                 return;
                             }
+                        }
                         exitIndex = atoi(receivedArgument);
                         /* signal var attribution */
                         varAttributed = 1;
@@ -284,7 +293,7 @@ void clicshell_exit(clicshell* self, int argc, char** argv)
             return;
         }
     }
-    console_msg( self->logger, sformat("Exiting - %d", &exitIndex) );
+    console_msg( self->logger, sformat("exiting - code > %d\n", exitIndex) );
     exit(exitIndex);
 }
 
@@ -298,7 +307,7 @@ void clicshell_exit(clicshell* self, int argc, char** argv)
 */
 void clicshell_exitHelp(clicshell* self)
 {
-    char* exitHelp = "exit - [description] : exit application - [commands] : ei--[(int) 0-3] application exit state parameter";
+    char* exitHelp = "exit - [description] : exit application - [commands] : ei--[(int) 0-3] application exit state parameter.\n";
     console_msg(self->logger, exitHelp);
 }
 
@@ -317,7 +326,6 @@ void clicshell_exitHelp(clicshell* self)
 void clicshell_automaticCommandFeed(clicshell* self, int argc, char** argv)
 {
     char filePath[MAXCHAR_INPUTBUF/2] = "";
-    char inputBuf[MAXCHAR_INPUTBUF];
     char* variables[1] = {
         "f" /* exit index */
     };
@@ -334,7 +342,7 @@ void clicshell_automaticCommandFeed(clicshell* self, int argc, char** argv)
         console_error(self->logger, sformat("Too many arguments. Expected %d ; Received %d.\n",size, argc));
         return;
     }
-    for(int i = 0; i < argc; argc++)
+    for(int i = 0; i < argc; i++)
     {
         /* signal that no variables was yet attributed */
         varAttributed = 0;
@@ -387,12 +395,19 @@ void clicshell_automaticCommandFeed(clicshell* self, int argc, char** argv)
            return; /* perform no further operations */
        }
        // if file opening to read was successfull
-       while( fscanf(commandFeedFile, "%s", inputBuf) )
-       {
+       int commandID = 0;
+       char inputBuf[MAXCHAR_INPUTBUF];
+       while( fgets(inputBuf, sizeof(inputBuf), commandFeedFile) != NULL)
+       {    
+            inputBuf[strcspn(inputBuf, "\n")] = 0;
+            struct CommandStack* cs = NULL;
             //store the read line on the command stack
-            CommandStack* cs = NULL;
+            cs = malloc(sizeof *cs);
+            cs->id = commandID;
             strcpy(cs->receivedCommand, inputBuf);
             HASH_ADD_INT(self->commandStack, id, cs);
+            commandID++;
+            inputBuf[0] = 0;
        }
     }
 }
@@ -422,11 +437,10 @@ void clicshell_acfHelp(clicshell* self)
 */
 void clicshell_help(clicshell* self)
 {
-    console_msg( self->logger, " #########################\n\tAvailable Operations:\n#########################\n" );
-    while((self->commands)++)
-    {
-        console_msg( self->logger, sformat("%s\n",*self->commands->help) );
-    }
+    console_msg( self->logger, "available operations>\n" );
+    struct cliccommand* it;
+    for(it = self->commands; it != NULL; it = it->hh.next)
+        console_msg( self->logger, sformat("%s - %s\n", it->name, it->help) );
     clicshell_acfHelp(self);
     clicshell_exitHelp(self);
 }
@@ -462,19 +476,15 @@ void clicshell_addCommand( clicshell* self, char* nam, char* help, void (*method
 void clicshell_run(clicshell* self)
 {
     console_msg(self->logger, "CLIC version 1.1\n");
-    console_msg(self->logger, "\n[!] Save terminal output to a file: ");
-    console_msg(self->logger, "./[main_file_name] > [history_text_file_name].txt\n");
-    console_msg(self->logger, "\n[!] View saved terminal output history file: ");
-    console_msg(self->logger, "cat [history_text_file_name].txt\n");
     /* initialize a new history entry to the terminal */
     clicshell_setupNewHistoryEntry(self);
     do
     {
-        char inputBuf[MAXCHAR_INPUTBUF];
-        char cmdName[MAXCHAR_NAME];
+        char inputBuf[MAXCHAR_INPUTBUF] = {'\0'};
+        char cmdName[MAXCHAR_NAME] = {'\0'};
         int argc = 0;
         char* argv[MAX_ARGS] = {"\0"};
-        if(self->commandStack) /* if there are commands to read from stack */
+        if(HASH_COUNT(self->commandStack)) /* if there are commands to read from stack */
         {
             strcpy(inputBuf, self->commandStack->receivedCommand);
             /* delete head command string pointer (pop_head) */
@@ -500,19 +510,12 @@ void clicshell_run(clicshell* self)
                     cmd->method(argc, argv);
                 } else {
                     /* command doesn't exist */
-                    console_error( self->logger, sformat("Non existant command - %s\n", cmdName) ); /* issue error log to console*/
+                    console_error( self->logger, sformat("Non existant command - '%s'\n", cmdName) ); /* issue error log to console*/
                 }
             }
         }
         else {
             console_error(self->logger, "Bad command preprocessing.\n");
-        }
-        
-        // clear allocated memory at the end of each creation cycle
-        for(int i=0; i<MAX_ARGS; i++)
-            if(strlen(argv[i]))
-                free(argv[i]);
-        free(argv);
-        
+        }     
     } while (1);
 }

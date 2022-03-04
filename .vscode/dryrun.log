@@ -1,21 +1,12 @@
 make --dry-run --always-make --keep-going --print-directory
 make: Entering directory `/Users/dasdias/SoftwareProjects/clic'
  
-In file included from src/libtest.c:1:
-src/clic.h:4:10: fatal error: 'src/cliccommand.h' file not found
- 
-#include "src/cliccommand.h"
-         ^~~~~~~~~~~~~~~~~~~
-1 error generated.
- 
 make: Leaving directory `/Users/dasdias/SoftwareProjects/clic'
- 
 make: Entering directory `/Users/dasdias/SoftwareProjects/clic'
 clang -Wall -Werror -Wextra -g -o obj/cliccommand.o -c src/cliccommand.c
  
 clang -Wall -Werror -Wextra -g -o obj/clicshell.o -c src/clicshell.c
 clang -Wall -Werror -Wextra -g -o obj/libtest.o -c src/libtest.c
 clang -Wall -Werror -Wextra -g -o libtest obj/cliccommand.o obj/clicshell.o obj/libtest.o src/lib/c-consolelogger/obj/libconsolelogger.o src/lib/c-consolelogger/src/lib/c-sformat/obj/libsformat.o
- 
 make: Leaving directory `/Users/dasdias/SoftwareProjects/clic'
  
