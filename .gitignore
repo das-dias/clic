@@ -1,5 +1,5 @@
-Makefile
 libtest
 libtest.d
 acf1.txt
 src/libtest.c
+Makefile
